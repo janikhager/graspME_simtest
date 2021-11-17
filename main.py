@@ -20,8 +20,12 @@ def sim_grasps_hand(grasp_files):
                                      cameraTargetPosition=(0, 0, -0.1),
                                      physicsClientId=s.physics_client_id)
         pos = [0, 0, 0]
-        orient = [1, 0, 0, 0]
+        orient = [0, 0, 0, 1]  # identity quaternion
         p.resetBasePositionAndOrientation(s.pandaId, pos, orient)
+        # p.addUserDebugLine([0, 0, 0], [0.1, 0, 0], [1, 0, 0], parentObjectUniqueId=s.pandaId, parentLinkIndex=0)
+        # p.addUserDebugLine([0, 0, 0], [0, 0.1, 0], [0, 1, 0], parentObjectUniqueId=s.pandaId, parentLinkIndex=0)
+        # p.addUserDebugLine([0, 0, 0], [0, 0, 0.1], [0, 0, 1], parentObjectUniqueId=s.pandaId, parentLinkIndex=0)
+
         body_frame = add_frame(p.getLinkState(s.pandaId, 0)[4], p.getLinkState(s.pandaId, 0)[5], length=0.2)
         for _ in range(100000):
             p.stepSimulation()
@@ -36,12 +40,12 @@ def sim_grasps_hand(grasp_files):
             poses = f_read['poses']
             num_grasps = len(poses)
 
-            obj_path = os.path.join("data", f_read['object'][()])
+            obj_path = os.path.join("data", f_read['object'][()].decode('UTF-8'))
             obj_scale = 100 * f_read['object_scale'][()]
             obj_com = f_read['object_com'][()]
             obj_vis = p.createVisualShape(shapeType=p.GEOM_MESH, fileName=obj_path,
-                                          meshScale=[obj_scale, obj_scale, obj_scale])
-            obj_id = p.createMultiBody(baseVisualShapeIndex=obj_vis, basePosition=obj_com)
+                                            meshScale=[obj_scale, obj_scale, obj_scale])
+            obj_id = p.createMultiBody(baseVisualShapeIndex=obj_vis)#, basePosition=obj_com) Not needed!
             print("\n\tObject '{}': {} grasps\n".format(obj_name, num_grasps))
 
             for i in range(num_grasps):
